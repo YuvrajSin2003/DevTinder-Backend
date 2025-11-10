@@ -4,10 +4,10 @@ const { userAuth } = require("../middleware/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
-const USER_SAFE_DATA = "firstName lastName PhototURL age gender about skills";
+const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
 
 //--------------------- API to get total requests received ---------------------
-// get all the pending req for the logged in user
+
 userRouter.get("/user/requests/recived", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
@@ -25,22 +25,23 @@ userRouter.get("/user/requests/recived", userAuth, async (req, res) => {
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
-    const connectionRequest = await connectionRequest
-      .find({
-        $or: [
-          { toUserId: loggedInUset._id, status: "accepted" },
-          { fromUserId: loggedInUser._id, status: "accepted" },
-        ],
-      })
+
+    const requests = await ConnectionRequest.find({
+      $or: [
+        { toUserId: loggedInUser._id, status: "accepted" },
+        { fromUserId: loggedInUser._id, status: "accepted" },
+      ],
+    })
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
 
-    const data = connectionRequest.map((row) => {
-      if (row.fromuserId._Id.toString() === loggedInUser._id.toString()) {
+    const data = requests.map((row) => {
+      if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
         return row.toUserId;
       }
       return row.fromUserId;
     });
+
     res.json({ data });
   } catch (err) {
     res.status(404).send("ERROR " + err.message);

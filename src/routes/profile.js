@@ -16,7 +16,9 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 // --------------------- PROFILE EDIT ROUTE ---------------------
 
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+  console.log("--- 1. /PROFILE/EDIT ROUTE HANDLER REACHED ---");
   try {
+    console.log("--- 2. TRY BLOCK ENTERED ---");
     if (!validateEditProfileData(req)) {
       throw new Error("Invalid credential for update");
     }
@@ -33,8 +35,9 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       data : loggedInUser
   });
   } catch (err) {
-    res.status(400).send("Error updating profile: " + err.message);
-  }
+  console.error("!!! PROFILE EDIT ERROR:", err); // <-- ADD THIS LINE
+  res.status(400).send("Error updating profile: " + err.message);
+}
 });
 
 

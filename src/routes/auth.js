@@ -47,15 +47,15 @@ authRouter.post("/login", async (req, res) => {
       const token = await user.getJWT();
 
      
-     res.cookie("token", token, {
+res.cookie("token", token, {
   httpOnly: true,
-  secure: false,          // ⚠️ use true only in production with HTTPS
-  sameSite: "none",        // or "none" if you're using HTTPS + cross-origin
+  secure: process.env.NODE_ENV === "production", // true in prod, false locally
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   expires: new Date(Date.now() + 8 * 3600000),
-  path: "/",              // explicitly allow all routes
+  path: "/",
 });
 
-      res.send("Login successful");
+      res.send(user);
     } else {
       throw new Error("Invalid password");
     }

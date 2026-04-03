@@ -8,18 +8,22 @@ const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
 
 //--------------------- API to get total requests received ---------------------
 
-userRouter.get("/user/requests/recived", userAuth, async (req, res) => {
+userRouter.get("/requests/received", userAuth, async (req, res) => {
   try {
+    if (!req.user) return res.status(401).send("Unauthorized");
+
     const loggedInUser = req.user;
     const connectionRequest = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "interested",
     }).populate("fromUserId", USER_SAFE_DATA);
-    //  }).populate("fromUserId" , ["firstName" , "lastName"])
+
+    res.json(connectionRequest);
   } catch (err) {
-    req.status(400).send("ERROR " + err.message);
+    res.status(400).send("ERROR: " + err.message);
   }
 });
+
 
 //--------------------- API to get total accepted request ---------------------
 userRouter.get("/user/connections", userAuth, async (req, res) => {

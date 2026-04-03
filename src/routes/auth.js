@@ -23,8 +23,16 @@ authRouter.post("/signup", async (req, res) => {
       password: passwordHash,
     });
 
-    await user.save();
-    res.send("User added successfully");
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      expires: new Date(Date.now() + 8 * 3600000),
+      path: "/",
+    });
+    res.json({message: "User added successfully", data:savedUser});
   } catch (err) {
     res.status(400).send("Error saving user: " + err.message);
   }
@@ -40,7 +48,7 @@ authRouter.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid credentials");
     }
-        // validatePassword should be a method in your User schema
+    // validatePassword should be a method in your User schema
     const isPasswordValid = await user.validatePassword(password);
     if (isPasswordValid) {
       
@@ -66,12 +74,16 @@ res.cookie("token", token, {
 
 // --------------------- LOG Out ---------------------
 
-authRouter.post("/logout" , (req, res) => {
-  res.cookie("token" , null , {
-    expires: new Date(Date.now()),
+authRouter.post("/logout", (req, res) => {
+  res.cookie("token", null, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    expires: new Date(0),
+    path: "/",
   });
   res.send("User log-out");
-})
+});
 
 
 module.exports = authRouter;

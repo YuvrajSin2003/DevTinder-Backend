@@ -75,11 +75,10 @@ res.cookie("token", token, {
 // --------------------- LOG Out ---------------------
 
 authRouter.post("/logout", (req, res) => {
-res.cookie("token", token, {
+res.clearCookie("token", {
   httpOnly: true,
-  secure: true,        // ✅ ALWAYS TRUE on Render (HTTPS)
-  sameSite: "None",    // ✅ REQUIRED for cross-origin
-  expires: new Date(Date.now() + 8 * 3600000),
+  secure: true,
+  sameSite: "None",
   path: "/",
 });
   res.send("User log-out");
